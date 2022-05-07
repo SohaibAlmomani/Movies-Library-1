@@ -1,6 +1,11 @@
-const express = require("express");
+"use strict";
 
+const express = require("express");
 const app = express();
+const port = 3000;
+const moviesData = require("./Movie-Data/data.json");
+
+function handleListen(port) {}
 
 function MoviesLibrary(title, posterPath, overview) {
   this.title = title;
@@ -8,43 +13,29 @@ function MoviesLibrary(title, posterPath, overview) {
   this.overview = overview;
 }
 
+app.get("/home", handleHomePage);
+app.get("/favorite", handleFavoritePage);
+app.get("/movie", handleMovie);
+app.get("*", handleError);
+
 app.listen(3000, () => {
   console.log("listening to port 3000");
 });
 
-const moviesData = require("./Movie-Data/data.json");
-
-let homePageHandler = (req, res) => {
-  let moviesLibrary = [];
-  moviesData.data.forEach((movie) => {
-    movie = new MoviesLibrary(movie.title, movie.posterPath, movie.overview);
-    moviesLibrary.push(movie);
-  });
+let handleHomePage = (req, res) => {
   return res.status(500).json(moviesLibrary);
 };
 
-app.get("/", homePageHandler);
-
-let favoritePageHandler = (req, res) => {
-  return res.status(500).send("To be filled");
+let handleFavoritePage = (req, res) => {
+  return res.status(500).send("Favorite Page");
 };
 
-app.get("/favorite", favoritePageHandler);
-
-const pageNotFoundHandler = (req, res) => {
-  return res.status(404).send({
-    status: 404,
-    responseText: "page not found",
-  });
+let handleMovie = (req, res) => {
+  let newMovie = new MoviesLibrary(newMovie.title, newMovie.posterPath, newMovie.overview);
+  moviesLibrary.push(newMovie);
+  return res.status(500).send(newMovie);
 };
 
-app.get("*", pageNotFoundHandler);
-
-const errorHandler = (err, req, res) => {
-  res.send({
-    status: 500,
-    responseText: "Sorry, something went wrong",
-  });
+const handleError = (req, res) => {
+  return res.status(404).send("page not found");
 };
-
-app.use(errorHandler);
