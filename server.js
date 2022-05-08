@@ -13,7 +13,7 @@ const dotenv = require("dotenv");
 const { Client } = require("pg");
 const client = new Client(url);
 
-const apiKey = process.env.apiKey;
+const apiKey = process.env.API_KEY;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
