@@ -9,8 +9,15 @@ const moviesData = require("./movie-data/data.json");
 const url = "postgres://yaseinburqan:6437@localhost:5432/moviedatabase";
 const bodyParser = require("body-parser");
 
+const axios = require("axios");
+const dotenv = require("dotenv");
+//const pg = require("pg");
+
 const { Client } = require("pg");
 const client = new Client(url);
+
+const apiKey = process.env.apiKey;
+const pg = require("pg");
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -30,15 +37,14 @@ client.connect().then(() => {
   });
 });
 
+// endpoints handling functions
 let handleAddMovie = (req, res) => {
   const { name, time, summary, image } = req.body;
-
   let sql = "INSERT INTO movie(name,time,summary,image ) VALUES($1, $2, $3, $4) RETURNING *;"; // sql query
   let values = [name, time, summary, image];
   client
     .query(sql, values)
     .then((result) => {
-      // console.log(result.rows);
       return res.status(201).json(result.rows[0]);
     })
     .catch();
@@ -46,13 +52,11 @@ let handleAddMovie = (req, res) => {
 
 let handleUpdateMovie = (req, res) => {
   const { name, time, summary, image } = req.body;
-
   let sql = "INSERT INTO movie(name,time,summary,image ) VALUES($1, $2, $3, $4) RETURNING *;"; // sql query
   let values = [name, time, summary, image];
   client
     .query(sql, values)
     .then((result) => {
-      // console.log(result.rows);
       return res.status(201).json(result.rows[0]);
     })
     .catch();
@@ -63,7 +67,6 @@ let handleHomePage = (req, res) => {
   client
     .query(sql)
     .then((result) => {
-      // console.log(result);
       return res.status(200).json(result.rows);
     })
     .catch((err) => {
@@ -79,8 +82,11 @@ const handleError = (req, res) => {
   return res.status(404).send("page not found");
 };
 
-app.post("/movie", handleAddMovie);
+// end points
 app.get("/home", handleHomePage);
+app.post("/movie", handleAddMovie);
 app.get("/favorite", handleFavoritePage);
+// app.put("/update", handleUpdateMovie);
+// app.put("/delete", handleDeleteMovie);
+// app.put("/select/:id", handleSelectMovie);
 app.get("*", handleError);
-app.put("/update-movie", handleUpdateMovie);
