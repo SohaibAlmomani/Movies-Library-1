@@ -21,14 +21,15 @@ const pg = require("pg");
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(cors());
+app.use(express.json());
+dotenv.config();
 
 function MoviesLibrary(title, posterPath, overview) {
   this.title = title;
   this.posterPath = posterPath;
   this.overview = overview;
 }
-
-app.use(cors());
 
 // after connection to db, start the server
 client.connect().then(() => {
@@ -63,7 +64,7 @@ let handleUpdateMovie = (req, res) => {
 };
 
 let handleHomePage = (req, res) => {
-  /* let sql = "SELECT * from movie;";
+  let sql = "SELECT * from movie;";
   client
     .query(sql)
     .then((result) => {
@@ -71,12 +72,29 @@ let handleHomePage = (req, res) => {
     })
     .catch((err) => {
       handleError(err, req, res);
-    }); */
+    });
 };
 
 let handleFavoritePage = (req, res) => {
   return res.status(200).send("Favorite Page");
 };
+
+function handleGetMovie(req, res) {
+  let id = req.params.id;
+  let sql = `SELECT * FROM movies WHERE id=${id};`;
+  client.query(sql).then((data) => {
+    res.status(200).json(data.rows);
+  });
+}
+
+function handleDeleteMovie(req, res) {
+  const { id } = req.params;
+  console.log(id);
+  const sql = `DELETE FROM movies WHERE id=${id};`;
+  client.query(sql).then(() => {
+    return res.status(204).json([]);
+  });
+}
 
 const handleError = (req, res) => {
   return res.status(404).send("page not found");
@@ -86,7 +104,7 @@ const handleError = (req, res) => {
 app.get("/home", handleHomePage);
 app.post("/movie", handleAddMovie);
 app.get("/favorite", handleFavoritePage);
-// app.put("/update", handleUpdateMovie);
-// app.put("/delete", handleDeleteMovie);
-// app.put("/select/:id", handleSelectMovie);
+app.put("/update", handleUpdateMovie);
+app.put("/delete", handleDeleteMovie);
+app.put("/getMovie", handleGetMovie);
 app.get("*", handleError);
