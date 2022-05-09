@@ -28,11 +28,16 @@ function MoviesLibrary(title, posterPath, overview) {
 }
 
 // after connection to db, start the server
-client.connect().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server is listening ${PORT}`);
-  });
-});
+/* client
+  .connect()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is listening ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    handleError(err, req, res);
+  }); */
 
 // endpoints handling functions
 
@@ -116,8 +121,13 @@ app.delete("/delete", handleDeleteMovie);
 app.get("/getMovie", handleGetMovie);
 app.get("*", handleError);
 
-client.connect().then(() => {
-  app.listen(PORT, () => {
-    console.log(`listening to port ${PORT}`);
-  });
-});
+/* client
+  .connect()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`listening to port ${PORT}`);
+    });
+  })
+  .catch((err) => {
+    handleError(err, req, res);
+  }); */
