@@ -1,24 +1,23 @@
 "use strict";
 
 const express = require("express");
+const axios = require("axios");
+const dotenv = require("dotenv");
 const cors = require("cors");
 const app = express();
-const PORT = process.env.PORT | 3001;
-
-const url = "postgres://yaseinburqan:6437@localhost:5432/moviedatabase";
+//const axios = require("axios");
+//const dotenv = require("dotenv");
+const PORT = process.env.PORT || 3001;
 const bodyParser = require("body-parser");
-
-const dotenv = require("dotenv");
-
+const urlDb = "postgres://yaseinburqan:6437@localhost:5432/moviedatabase";
 const { Client } = require("pg");
-const client = new Client(url);
-
 const apiKey = process.env.API_KEY;
+const client = new Client(urlDb);
 
+app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
-app.use(express.json());
 dotenv.config();
 
 function MoviesLibrary(title, posterPath, overview) {
@@ -27,20 +26,7 @@ function MoviesLibrary(title, posterPath, overview) {
   this.overview = overview;
 }
 
-// after connection to db, start the server
-/* client
-  .connect()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server is listening ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    handleError(err, req, res);
-  }); */
-
 // endpoints handling functions
-
 let handleHomePage = (req, res) => {
   let sql = "SELECT * from movie;";
   client
@@ -52,6 +38,17 @@ let handleHomePage = (req, res) => {
       handleError(err, req, res);
     });
 };
+
+function trendingPageHandler(req, res) {
+  let trendingMovies = [];
+  axios.get(`https://api.themoviedb.org/3/trending/all/week?api_key=${process.env.apiKey}&language=en-US`).then((value) => {
+    value.data.results.forEach((movie) => {
+      movie = new MoviesLibrary(movie.title, movie.poster_path, movie.overview);
+      trendingMovies.push(movie);
+    });
+    return res.status(200).json(trendingMovies);
+  });
+}
 
 let handleAddMovie = (req, res) => {
   const { name, time, summary, image } = req.body;
@@ -66,68 +63,58 @@ let handleAddMovie = (req, res) => {
 };
 
 let handleUpdateMovie = (req, res) => {
-  const { name, time, summary, image } = req.body;
-  let sql = "INSERT INTO movie(name,time,summary,image ) VALUES($1, $2, $3, $4) RETURNING *;"; // sql query
-  let values = [name, time, summary, image];
+  const id = req.params.id;
+  // req.body.comment;
+  const comment = req.body.comment;
+  //comment.push(req.body.comment);
+  const sql = `UPDATE movie SET comment=$1 WHERE id=${id} RETURNING *;`;
+  console.log("handleUpdateMovie");
+  const values = [comment];
   client
     .query(sql, values)
-    .then((result) => {
-      return res.status(201).json(result.rows);
+    .then((data) => {
+      return res.status(201).json(data.rows);
     })
     .catch();
-
-  // const id = req.params.id;
-  // const movie = req.body;
-
-  // const sql = `UPDATE movies SET comment=$1 WHERE id=${id} RETURNING *;`;
-  // const values = [movie.comment];
-
-  // client.query(sql, values).then((data) => {
-  //   return res.status(200).json(data.rows);
-  // });
 };
 
 let handleFavoritePage = (req, res) => {
   return res.status(200).send("Favorite Page");
 };
 
-function handleGetMovie(req, res) {
+function handleGetMovieById(req, res) {
   let id = req.params.id;
   let sql = `SELECT * FROM movie WHERE id=${id};`;
-  client.query(sql).then((data) => {
-    res.status(200).json(data.rows);
+  client.query(sql).then((result) => {
+    res.status(200).json(result.rows);
   });
 }
 
 function handleDeleteMovie(req, res) {
   const { id } = req.params;
   console.log(id);
-  const sql = `DELETE FROM movie WHERE id=${id};`;
+  const sql = `DELETE  FROM movie WHERE id=${id};`;
   client.query(sql).then(() => {
     return res.status(204).json([]);
   });
 }
 
-const handleError = (req, res) => {
+function handleError(req, res) {
   return res.status(404).send("page not found");
-};
+}
 
 // end points
 app.get("/home", handleHomePage);
-app.post("/movie", handleAddMovie);
+app.get("/trending", trendingPageHandler);
+app.post("/addMovie", handleAddMovie);
 app.get("/favorite", handleFavoritePage);
-app.put("/update", handleUpdateMovie);
-app.delete("/delete", handleDeleteMovie);
-app.get("/getMovie", handleGetMovie);
+app.put("/update/:id", handleUpdateMovie);
+app.delete("/delete/:id", handleDeleteMovie);
+app.get("/getMovieById/:id", handleGetMovieById);
 app.get("*", handleError);
 
-/* client
-  .connect()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`listening to port ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    handleError(err, req, res);
-  }); */
+client.connect().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server is listening ${PORT}`);
+  });
+});
