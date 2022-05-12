@@ -76,6 +76,18 @@ let handleUpdateMovie = (req, res) => {
       return res.status(201).json(data.rows);
     })
     .catch();
+
+  
+  // const id = req.params.id;
+  // const movie = req.body;
+
+  // const sql = `UPDATE movies SET comment=$1 WHERE id=${id} RETURNING *;`;
+  // const values = [movie.comment];
+
+  // client.query(sql, values).then((data) => {
+  //   return res.status(200).json(data.rows);
+  // });
+
 };
 
 let handleFavoritePage = (req, res) => {
