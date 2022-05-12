@@ -26,7 +26,7 @@ function MoviesLibrary(title, posterPath, overview) {
   this.overview = overview;
 }
 
-// endpoints handling functions
+// end points handling functions
 let handleHomePage = (req, res) => {
   let sql = "SELECT * from movie;";
   client
