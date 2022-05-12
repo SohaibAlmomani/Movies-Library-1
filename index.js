@@ -7,6 +7,7 @@ const cors = require("cors");
 const app = express();
 //const axios = require("axios");
 //const dotenv = require("dotenv");
+
 const PORT = process.env.PORT || 3001;
 const bodyParser = require("body-parser");
 const urlDb = "postgres://yaseinburqan:6437@localhost:5432/moviedatabase";
