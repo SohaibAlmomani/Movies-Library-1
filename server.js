@@ -45,6 +45,7 @@ function trendingPageHandler(req, res) {
       movie = new MoviesLibrary(movie.title, movie.poster_path, movie.overview);
       trendingMovies.push(movie);
     });
+
     return res.status(200).json(trendingMovies);
   });
 }
