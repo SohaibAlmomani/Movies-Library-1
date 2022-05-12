@@ -66,16 +66,20 @@ let handleAddMovie = (req, res) => {
 };
 
 let handleUpdateMovie = (req, res) => {
-  const { name, time, summary, image } = req.body;
-  let sql = "INSERT INTO movie(name,time,summary,image ) VALUES($1, $2, $3, $4) RETURNING *;"; // sql query
-  let values = [name, time, summary, image];
+  const id = req.params.id;
+  // req.body.comment;
+  const comment = req.body.comment;
+  //comment.push(req.body.comment);
+  const sql = `UPDATE movie SET comment=$1 WHERE id=${id} RETURNING *;`;
+  console.log("handleUpdateMovie");
+  const values = [comment];
   client
     .query(sql, values)
-    .then((result) => {
-      return res.status(201).json(result.rows);
+    .then((data) => {
+      return res.status(201).json(data.rows);
     })
     .catch();
-
+  
   // const id = req.params.id;
   // const movie = req.body;
 
